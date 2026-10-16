@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import random
 
 from glfw.GLFW import *
 
@@ -14,7 +15,7 @@ def startup():
 def shutdown():
     pass
 
-def paintQuad(x,y,a,b):
+def paintQuad(x,y,a,b): # Task 2
     glBegin(GL_QUADS)
     glVertex2f(x, y)
     glVertex2f(x+a, y)
@@ -22,10 +23,48 @@ def paintQuad(x,y,a,b):
     glVertex2f(x, y+b)
     glEnd()
 
+
+def paintQuad2(x, y, a, b, d=0):  # Task 3
+    random.seed(d)
+    glBegin(GL_QUADS)
+
+    glColor3f(random.random(), random.random(), random.random())
+    glVertex2f(x + random.uniform(-d, d), y + random.uniform(-d, d))
+    glColor3f(random.random(), random.random(), random.random())
+    glVertex2f(x + a + random.uniform(-d, d), y + random.uniform(-d, d))
+    glColor3f(random.random(), random.random(), random.random())
+    glVertex2f(x + a + random.uniform(-d, d), y + b + random.uniform(-d, d))
+    glColor3f(random.random(), random.random(), random.random())
+    glVertex2f(x + random.uniform(-d, d), y + b + random.uniform(-d, d))
+
+    glEnd()
+
+
+def paintTriangles():   # Task 1
+    glBegin(GL_TRIANGLES)
+    glColor3f(0.5, 0.0, 0.0)
+    glVertex2f(-60, 10)
+    glColor3f(0.0, 1.0, 0.0)
+    glVertex2f(-100, -50)
+    glColor3f(0.0, 0.75, 0.75)
+    glVertex2f(-15, -15)
+    glEnd()
+
+    glBegin(GL_TRIANGLES)
+    glColor3f(1.0, 0.0, 0.0)
+    glVertex2f(-100, 50)
+    glColor3f(0.0, 1.0, 0.0)
+    glVertex2f(50, 0)
+    glColor3f(0.0, 0.0, 1.0)
+    glVertex2f(100, 100)
+    glEnd()
+
 def render(time):
     glClear(GL_COLOR_BUFFER_BIT)
 
-    paintQuad(-50,-50,50,100)
+    #paintTriangles()
+    #paintQuad(-50,-50,50,100)
+    paintQuad2(-50,-50,50,100, 150)
 
     glFlush()
 
