@@ -14,27 +14,18 @@ def startup():
 def shutdown():
     pass
 
+def paintQuad(x,y,a,b):
+    glBegin(GL_QUADS)
+    glVertex2f(x, y)
+    glVertex2f(x+a, y)
+    glVertex2f(x+a, y+b)
+    glVertex2f(x, y+b)
+    glEnd()
 
 def render(time):
     glClear(GL_COLOR_BUFFER_BIT)
 
-    glBegin(GL_TRIANGLES)
-    glColor3f(0.5, 0.0, 0.0)
-    glVertex2f(-60, 10)
-    glColor3f(0.0, 0.0, 1.0)
-    glVertex2f(-100, -50)
-    glColor3f(0.0, 0.75, 0.0)
-    glVertex2f(0, 0)
-    glEnd()
-
-    glBegin(GL_TRIANGLES)
-    glColor3f(1.0, 0.0, 0.0)
-    glVertex2f(-100, 50)
-    glColor3f(0.0, 1.0, 0.0)
-    glVertex2f(50, 0)
-    glColor3f(0.0, 0.0, 1.0)
-    glVertex2f(100, 100)
-    glEnd()
+    paintQuad(-50,-50,50,100)
 
     glFlush()
 
