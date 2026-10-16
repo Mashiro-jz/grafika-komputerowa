@@ -93,7 +93,7 @@ def render(time):
     glClear(GL_COLOR_BUFFER_BIT)
     random.seed(42)
 
-    N = 3
+    N = 4
     def_val = 0.0
 
     glBegin(GL_QUADS)
