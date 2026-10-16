@@ -18,29 +18,22 @@ def shutdown():
 def render(time):
     glClear(GL_COLOR_BUFFER_BIT)
 
-    x = 0.0
-    y = 0.0
-    hx = 60.0
-    hy = 40.0
-
-    # współrzedne boków trójkątów
-    bl_x, bl_y = x - hx, y - hy
-    br_x, br_y = x + hx, y + hy
-    tl_x, tl_y = x - hx, y + hy
-    tr_x, tr_y = x + hx, y - hy
-
     glBegin(GL_TRIANGLES)
-    glColor3f(1.0, 0.0, 0.0)
-    glVertex2f(bl_x, bl_y)
-    glVertex2f(br_x, br_y)
-    glVertex2f(tl_x, tl_y)
+    glColor3f(0.5, 0.0, 0.0)
+    glVertex2f(-60, 10)
+    glColor3f(0.0, 0.0, 1.0)
+    glVertex2f(-100, -50)
+    glColor3f(0.0, 0.75, 0.0)
+    glVertex2f(0, 0)
     glEnd()
 
     glBegin(GL_TRIANGLES)
+    glColor3f(1.0, 0.0, 0.0)
+    glVertex2f(-100, 50)
     glColor3f(0.0, 1.0, 0.0)
-    glVertex2f(br_x, br_y)
-    glVertex2f(tr_x, tr_y)
-    glVertex2f(bl_x, bl_y)
+    glVertex2f(50, 0)
+    glColor3f(0.0, 0.0, 1.0)
+    glVertex2f(100, 100)
     glEnd()
 
     glFlush()
