@@ -1,16 +1,91 @@
 #!/usr/bin/env python3
 import sys
+import math
+import random
 
 from glfw.GLFW import *
-
 from OpenGL.GL import *
 from OpenGL.GLU import *
+
+N = 50
+tab = [[[0.0] * 3 for i in range(N)] for j in range(N)]
+colors = [[[0.0] * 3 for i in range(N)] for j in range(N)]
+
+u_array = [i / (N - 1) for i in range(N)]
+v_array = [i / (N - 1) for i in range(N)]
+
+
+def calculate_egg():
+    for i in range(N):
+        u = u_array[i]
+        for j in range(N):
+            v = v_array[j]
+
+            x = (-90 * u ** 5 + 225 * u ** 4 - 270 * u ** 3 + 180 * u ** 2 - 45 * u) * math.cos(math.pi * 2 * v)
+            y = 160 * u ** 4 - 320 * u ** 3 + 160 * u ** 2 - 5
+            z = (-90 * u ** 5 + 225 * u ** 4 - 270 * u ** 3 + 180 * u ** 2 - 45 * u) * math.sin(math.pi * 2 * v)
+
+            tab[i][j][0] = x
+            tab[i][j][1] = y
+            tab[i][j][2] = z
+
+            colors[i][j][0] = random.random()
+            colors[i][j][1] = random.random()
+            colors[i][j][2] = random.random()
+
+
+def spin(angle):
+    glRotatef(angle, 1.0, 1.0, 0.0)
+
+
+def draw_egg_points():
+    glBegin(GL_POINTS)
+    glColor3f(1.0, 1.0, 1.0)
+    for i in range(N):
+        for j in range(N):
+            glVertex3fv(tab[i][j])
+    glEnd()
+
+
+def draw_egg_lines():
+    glBegin(GL_LINES)
+    glColor3f(1.0, 1.0, 1.0)
+    for i in range(N):
+        for j in range(N):
+            if i < N - 1:
+                glVertex3fv(tab[i][j])
+                glVertex3fv(tab[i + 1][j])
+            if j < N - 1:
+                glVertex3fv(tab[i][j])
+                glVertex3fv(tab[i][j + 1])
+    glEnd()
+
+
+def draw_egg_triangles():
+    glBegin(GL_TRIANGLES)
+    for i in range(N - 1):
+        for j in range(N - 1):
+            glColor3fv(colors[i][j])
+            glVertex3fv(tab[i][j])
+            glColor3fv(colors[i + 1][j])
+            glVertex3fv(tab[i + 1][j])
+            glColor3fv(colors[i][j + 1])
+            glVertex3fv(tab[i][j + 1])
+
+            glColor3fv(colors[i + 1][j])
+            glVertex3fv(tab[i + 1][j])
+            glColor3fv(colors[i + 1][j + 1])
+            glVertex3fv(tab[i + 1][j + 1])
+            glColor3fv(colors[i][j + 1])
+            glVertex3fv(tab[i][j + 1])
+    glEnd()
 
 
 def startup():
     update_viewport(None, 400, 400)
     glClearColor(0.0, 0.0, 0.0, 1.0)
     glEnable(GL_DEPTH_TEST)
+    calculate_egg()
 
 
 def shutdown():
@@ -19,19 +94,15 @@ def shutdown():
 
 def axes():
     glBegin(GL_LINES)
-
     glColor3f(1.0, 0.0, 0.0)
     glVertex3f(-5.0, 0.0, 0.0)
     glVertex3f(5.0, 0.0, 0.0)
-
     glColor3f(0.0, 1.0, 0.0)
     glVertex3f(0.0, -5.0, 0.0)
     glVertex3f(0.0, 5.0, 0.0)
-
     glColor3f(0.0, 0.0, 1.0)
     glVertex3f(0.0, 0.0, -5.0)
     glVertex3f(0.0, 0.0, 5.0)
-
     glEnd()
 
 
@@ -39,7 +110,13 @@ def render(time):
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
+    angle = time * 180 / math.pi
+    spin(angle)
+
     axes()
+    # draw_egg_points()
+    # draw_egg_lines()
+    draw_egg_triangles()
 
     glFlush()
 
@@ -83,7 +160,6 @@ def main():
         glfwSwapBuffers(window)
         glfwPollEvents()
     shutdown()
-
     glfwTerminate()
 
 
