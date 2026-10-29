@@ -33,6 +33,9 @@ def calculate_egg():
             colors[i][j][1] = random.random()
             colors[i][j][2] = random.random()
 
+    for i in range(N):
+        colors[i][N - 1] = colors[i][0]
+
 
 def spin(angle):
     glRotatef(angle, 1.0, 1.0, 0.0)
@@ -81,6 +84,17 @@ def draw_egg_triangles():
     glEnd()
 
 
+def draw_egg_triangle_strip():
+    for i in range(N - 1):
+        glBegin(GL_TRIANGLE_STRIP)
+        for j in range(N):
+            glColor3fv(colors[i][j])
+            glVertex3fv(tab[i][j])
+            glColor3fv(colors[i + 1][j])
+            glVertex3fv(tab[i + 1][j])
+        glEnd()
+
+
 def startup():
     update_viewport(None, 400, 400)
     glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -116,7 +130,8 @@ def render(time):
     axes()
     # draw_egg_points()
     # draw_egg_lines()
-    draw_egg_triangles()
+    # draw_egg_triangles()
+    draw_egg_triangle_strip()
 
     glFlush()
 
