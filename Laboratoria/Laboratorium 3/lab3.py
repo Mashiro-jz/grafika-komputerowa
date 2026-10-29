@@ -47,7 +47,7 @@ def draw_egg_points():
     for i in range(N):
         for j in range(N):
             glVertex3fv(tab[i][j])
-    glEnd()
+    glEnd() #
 
 
 def draw_egg_lines():
