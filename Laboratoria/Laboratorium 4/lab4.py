@@ -11,19 +11,25 @@ theta = 0.0
 phi = 0.0
 pix2angle = 1.0
 
+scale = 1.0
+
 left_mouse_button_pressed = 0
+right_mouse_button_pressed = 0
 mouse_x_pos_old = 0
 mouse_y_pos_old = 0
 delta_x = 0
 delta_y = 0
+
 
 def startup():
     update_viewport(None, 400, 400)
     glClearColor(0.0, 0.0, 0.0, 1.0)
     glEnable(GL_DEPTH_TEST)
 
+
 def shutdown():
     pass
+
 
 def axes():
     glBegin(GL_LINES)
@@ -37,6 +43,7 @@ def axes():
     glVertex3f(0.0, 0.0, -5.0)
     glVertex3f(0.0, 0.0, 5.0)
     glEnd()
+
 
 def example_object():
     glColor3f(1.0, 1.0, 1.0)
@@ -65,8 +72,9 @@ def example_object():
     glRotatef(-90, 1.0, 0.0, 0.0)
     gluDeleteQuadric(quadric)
 
+
 def render(time):
-    global theta, phi
+    global theta, phi, scale
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
@@ -78,12 +86,18 @@ def render(time):
         theta += delta_x * pix2angle
         phi += delta_y * pix2angle
 
+    if right_mouse_button_pressed:
+        scale += delta_y * 0.01
+
     glRotatef(theta, 0.0, 1.0, 0.0)
     glRotatef(phi, 1.0, 0.0, 0.0)
+
+    glScalef(scale, scale, scale)
 
     axes()
     example_object()
     glFlush()
+
 
 def update_viewport(window, width, height):
     global pix2angle
@@ -98,9 +112,11 @@ def update_viewport(window, width, height):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
+
 def keyboard_key_callback(window, key, scancode, action, mods):
     if key == GLFW_KEY_ESCAPE and action == GLFW_PRESS:
         glfwSetWindowShouldClose(window, GLFW_TRUE)
+
 
 def mouse_motion_callback(window, x_pos, y_pos):
     global delta_x, delta_y
@@ -112,12 +128,20 @@ def mouse_motion_callback(window, x_pos, y_pos):
     delta_y = y_pos - mouse_y_pos_old
     mouse_y_pos_old = y_pos
 
+
 def mouse_button_callback(window, button, action, mods):
-    global left_mouse_button_pressed
+    global left_mouse_button_pressed, right_mouse_button_pressed
+
     if button == GLFW_MOUSE_BUTTON_LEFT and action == GLFW_PRESS:
         left_mouse_button_pressed = 1
-    else:
+    elif button == GLFW_MOUSE_BUTTON_LEFT and action == GLFW_RELEASE:
         left_mouse_button_pressed = 0
+
+    if button == GLFW_MOUSE_BUTTON_RIGHT and action == GLFW_PRESS:
+        right_mouse_button_pressed = 1
+    elif button == GLFW_MOUSE_BUTTON_RIGHT and action == GLFW_RELEASE:
+        right_mouse_button_pressed = 0
+
 
 def main():
     if not glfwInit():
@@ -142,6 +166,7 @@ def main():
         glfwPollEvents()
     shutdown()
     glfwTerminate()
+
 
 if __name__ == '__main__':
     main()
