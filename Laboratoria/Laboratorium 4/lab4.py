@@ -6,9 +6,16 @@ from glfw.GLFW import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-theta = 0.0
-phi = 0.0
+mode = 1
+
+theta_c = 0.0
+phi_c = 0.0
 R = 10.0
+
+theta_o = 0.0
+phi_o = 0.0
+scale = 1.0
+
 pix2angle = 1.0
 
 left_mouse_button_pressed = 0
@@ -72,20 +79,40 @@ def example_object():
 
 
 def render(time):
-    global theta, phi, R
+    global theta_c, phi_c, R, theta_o, phi_o, scale, mode
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
     if left_mouse_button_pressed:
-        theta += delta_x * pix2angle
-        phi += delta_y * pix2angle
+        if mode == 1:
+            theta_c += delta_x * pix2angle
+            phi_c += delta_y * pix2angle
+        else:
+            theta_o += delta_x * pix2angle
+            phi_o += delta_y * pix2angle
 
     if right_mouse_button_pressed:
-        R += delta_y * 0.1
+        if mode == 1:
+            R += delta_y * 0.1
+            if R < 1.0:
+                R = 1.0
+            elif R > 50.0:
+                R = 50.0
+        else:
+            scale += delta_y * 0.01
+            if scale < 0.1:
+                scale = 0.1
 
-    theta_rad = theta * math.pi / 180.0
-    phi_rad = phi * math.pi / 180.0
+    theta_c %= 360.0
+    phi_c %= 360.0
+
+    up_y = 1.0
+    if 90.0 < phi_c < 270.0:
+        up_y = -1.0
+
+    theta_rad = theta_c * math.pi / 180.0
+    phi_rad = phi_c * math.pi / 180.0
 
     x_eye = R * math.cos(theta_rad) * math.cos(phi_rad)
     y_eye = R * math.sin(phi_rad)
@@ -93,7 +120,11 @@ def render(time):
 
     gluLookAt(x_eye, y_eye, z_eye,
               0.0, 0.0, 0.0,
-              0.0, 1.0, 0.0)
+              0.0, up_y, 0.0)
+
+    glRotatef(theta_o, 0.0, 1.0, 0.0)
+    glRotatef(phi_o, 1.0, 0.0, 0.0)
+    glScalef(scale, scale, scale)
 
     axes()
     example_object()
@@ -115,8 +146,11 @@ def update_viewport(window, width, height):
 
 
 def keyboard_key_callback(window, key, scancode, action, mods):
+    global mode
     if key == GLFW_KEY_ESCAPE and action == GLFW_PRESS:
         glfwSetWindowShouldClose(window, GLFW_TRUE)
+    if key == GLFW_KEY_SPACE and action == GLFW_PRESS:
+        mode = 1 - mode
 
 
 def mouse_motion_callback(window, x_pos, y_pos):
