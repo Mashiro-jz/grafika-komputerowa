@@ -1,0 +1,14 @@
+*
+!*/
+!*.py
+!*.tga
+!/.gitignore
+
+.venv/
+venv/
+env/
+__pycache__/
+.idea/
+.vscode/
+build/
+dist/
