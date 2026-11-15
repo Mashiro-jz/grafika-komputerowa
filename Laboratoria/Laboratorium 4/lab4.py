@@ -6,24 +6,23 @@ from glfw.GLFW import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-mode = 1
+eye_x = 0.0
+eye_y = 0.0
+eye_z = 10.0
 
-theta_c = 0.0
-phi_c = 0.0
-R = 10.0
+yaw = -90.0
+pitch = 0.0
 
-theta_o = 0.0
-phi_o = 0.0
-scale = 1.0
-
-pix2angle = 1.0
+keys = {
+    GLFW_KEY_W: False,
+    GLFW_KEY_S: False,
+    GLFW_KEY_A: False,
+    GLFW_KEY_D: False
+}
 
 left_mouse_button_pressed = 0
-right_mouse_button_pressed = 0
 mouse_x_pos_old = 0
 mouse_y_pos_old = 0
-delta_x = 0
-delta_y = 0
 
 
 def startup():
@@ -79,52 +78,40 @@ def example_object():
 
 
 def render(time):
-    global theta_c, phi_c, R, theta_o, phi_o, scale, mode
+    global eye_x, eye_y, eye_z
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
-    if left_mouse_button_pressed:
-        if mode == 1:
-            theta_c += delta_x * pix2angle
-            phi_c += delta_y * pix2angle
-        else:
-            theta_o += delta_x * pix2angle
-            phi_o += delta_y * pix2angle
+    yaw_rad = math.radians(yaw)
+    pitch_rad = math.radians(pitch)
 
-    if right_mouse_button_pressed:
-        if mode == 1:
-            R += delta_y * 0.1
-            if R < 1.0:
-                R = 1.0
-            elif R > 50.0:
-                R = 50.0
-        else:
-            scale += delta_y * 0.01
-            if scale < 0.1:
-                scale = 0.1
+    front_x = math.cos(yaw_rad) * math.cos(pitch_rad)
+    front_y = math.sin(pitch_rad)
+    front_z = math.sin(yaw_rad) * math.cos(pitch_rad)
 
-    theta_c %= 360.0
-    phi_c %= 360.0
+    right_x = math.cos(yaw_rad - math.pi / 2.0)
+    right_z = math.sin(yaw_rad - math.pi / 2.0)
 
-    up_y = 1.0
-    if 90.0 < phi_c < 270.0:
-        up_y = -1.0
+    speed = 0.1
+    if keys[GLFW_KEY_W]:
+        eye_x += front_x * speed
+        eye_y += front_y * speed
+        eye_z += front_z * speed
+    if keys[GLFW_KEY_S]:
+        eye_x -= front_x * speed
+        eye_y -= front_y * speed
+        eye_z -= front_z * speed
+    if keys[GLFW_KEY_A]:
+        eye_x -= right_x * speed
+        eye_z -= right_z * speed
+    if keys[GLFW_KEY_D]:
+        eye_x += right_x * speed
+        eye_z += right_z * speed
 
-    theta_rad = theta_c * math.pi / 180.0
-    phi_rad = phi_c * math.pi / 180.0
-
-    x_eye = R * math.cos(theta_rad) * math.cos(phi_rad)
-    y_eye = R * math.sin(phi_rad)
-    z_eye = R * math.sin(theta_rad) * math.cos(phi_rad)
-
-    gluLookAt(x_eye, y_eye, z_eye,
-              0.0, 0.0, 0.0,
-              0.0, up_y, 0.0)
-
-    glRotatef(theta_o, 0.0, 1.0, 0.0)
-    glRotatef(phi_o, 1.0, 0.0, 0.0)
-    glScalef(scale, scale, scale)
+    gluLookAt(eye_x, eye_y, eye_z,
+              eye_x + front_x, eye_y + front_y, eye_z + front_z,
+              0.0, 1.0, 0.0)
 
     axes()
     example_object()
@@ -132,8 +119,10 @@ def render(time):
 
 
 def update_viewport(window, width, height):
-    global pix2angle
-    pix2angle = 360.0 / width
+    if width == 0:
+        width = 1
+    if height == 0:
+        height = 1
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(70, 1.0, 0.1, 300.0)
@@ -146,36 +135,40 @@ def update_viewport(window, width, height):
 
 
 def keyboard_key_callback(window, key, scancode, action, mods):
-    global mode
     if key == GLFW_KEY_ESCAPE and action == GLFW_PRESS:
         glfwSetWindowShouldClose(window, GLFW_TRUE)
-    if key == GLFW_KEY_SPACE and action == GLFW_PRESS:
-        mode = 1 - mode
+    if key in keys:
+        if action == GLFW_PRESS:
+            keys[key] = True
+        elif action == GLFW_RELEASE:
+            keys[key] = False
 
 
 def mouse_motion_callback(window, x_pos, y_pos):
-    global delta_x, delta_y
-    global mouse_x_pos_old, mouse_y_pos_old
+    global mouse_x_pos_old, mouse_y_pos_old, yaw, pitch
 
     delta_x = x_pos - mouse_x_pos_old
-    mouse_x_pos_old = x_pos
-
     delta_y = y_pos - mouse_y_pos_old
+    mouse_x_pos_old = x_pos
     mouse_y_pos_old = y_pos
+
+    if left_mouse_button_pressed:
+        yaw += delta_x * 0.2
+        pitch -= delta_y * 0.2
+
+        if pitch > 89.0:
+            pitch = 89.0
+        elif pitch < -89.0:
+            pitch = -89.0
 
 
 def mouse_button_callback(window, button, action, mods):
-    global left_mouse_button_pressed, right_mouse_button_pressed
+    global left_mouse_button_pressed
 
     if button == GLFW_MOUSE_BUTTON_LEFT and action == GLFW_PRESS:
         left_mouse_button_pressed = 1
     elif button == GLFW_MOUSE_BUTTON_LEFT and action == GLFW_RELEASE:
         left_mouse_button_pressed = 0
-
-    if button == GLFW_MOUSE_BUTTON_RIGHT and action == GLFW_PRESS:
-        right_mouse_button_pressed = 1
-    elif button == GLFW_MOUSE_BUTTON_RIGHT and action == GLFW_RELEASE:
-        right_mouse_button_pressed = 0
 
 
 def main():
