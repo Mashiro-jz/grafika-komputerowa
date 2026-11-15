@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 import sys
+import math
 
 from glfw.GLFW import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-viewer = [0.0, 0.0, 10.0]
-
 theta = 0.0
 phi = 0.0
+R = 10.0
 pix2angle = 1.0
-
-scale = 1.0
 
 left_mouse_button_pressed = 0
 right_mouse_button_pressed = 0
@@ -74,25 +72,28 @@ def example_object():
 
 
 def render(time):
-    global theta, phi, scale
+    global theta, phi, R
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
-
-    gluLookAt(viewer[0], viewer[1], viewer[2],
-              0.0, 0.0, 0.0, 0.0, 1.0, 0.0)
 
     if left_mouse_button_pressed:
         theta += delta_x * pix2angle
         phi += delta_y * pix2angle
 
     if right_mouse_button_pressed:
-        scale += delta_y * 0.01
+        R += delta_y * 0.1
 
-    glRotatef(theta, 0.0, 1.0, 0.0)
-    glRotatef(phi, 1.0, 0.0, 0.0)
+    theta_rad = theta * math.pi / 180.0
+    phi_rad = phi * math.pi / 180.0
 
-    glScalef(scale, scale, scale)
+    x_eye = R * math.cos(theta_rad) * math.cos(phi_rad)
+    y_eye = R * math.sin(phi_rad)
+    z_eye = R * math.sin(theta_rad) * math.cos(phi_rad)
+
+    gluLookAt(x_eye, y_eye, z_eye,
+              0.0, 0.0, 0.0,
+              0.0, 1.0, 0.0)
 
     axes()
     example_object()
